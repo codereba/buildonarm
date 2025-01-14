@@ -10,6 +10,7 @@ Start cmd.exe, input the commands:
 ```
 set VS_ROOT=<visual studio installation root>
 mkdir build-uadacity
+cd build-uadacity
 python -m venv build-env
 .\build-env\Scripts\activate
 pip install -U pip
@@ -52,5 +53,7 @@ Please refer to:
 https://github.com/conan-io/conan-center-index/compare/master...codereba:conan-center-index:mpg123/removeMSYS2RequirementIfBuildWithMSVC
 
 ## After that run next commands:
+```
 cmake .. -G "Visual Studio 17 2022" -A ARM64 -Thost=ARM64 -B output -DCMAKE_BUILD_TYPE=Debug
 cmake --build output
+```
