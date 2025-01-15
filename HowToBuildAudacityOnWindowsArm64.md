@@ -27,33 +27,34 @@ cmake .. -G "Visual Studio 17 2022" -A ARM64 -Thost=ARM64 -B output -DCMAKE_BUIL
 ## Exist issues and solutions:
 "Only Windows x64 supported" is displayed.
 
-Find the conanfile.py of mpg123 in the conan2 cache (default is <User home>\.conan2), and fix it according to the following patch:
+Find the conanfile.py of mpg123 in the conan2 cache (default is <User home>\.conan2), and fix it according to the following lines:
 
 ```
-diff --git a/recipes/mpg123/all/conanfile.py b/recipes/mpg123/all/conanfile.py
-index a4d19cd12463a..8a8094891085a 100644
---- a/recipes/mpg123/all/conanfile.py
-+++ b/recipes/mpg123/all/conanfile.py
-@@ -100,9 +100,10 @@ def build_requirements(self):
+@@ -99,11 +99,10 @@ def build_requirements(self):
+             self.tool_requires("pkgconf/2.0.3")
          if self.settings.arch in ["x86", "x86_64"]:
              self.tool_requires("yasm/1.3.0")
-         if self._settings_build.os == "Windows":
--            self.win_bash = True
--            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
--                self.tool_requires("msys2/cci.latest")
-+            if is_msvc(self) == False:
-+                self.win_bash = True
-+                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-+                    self.tool_requires("msys2/cci.latest")
- 
+```
+**
+```
+       if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
+```
+**
+
+```
      def source(self):
          get(self, **self.conan_data["sources"][self.version], strip_root=True)
 ```
 Please refer to:
-https://github.com/conan-io/conan-center-index/compare/master...codereba:conan-center-index:mpg123/removeMSYS2RequirementIfBuildWithMSVC
+https://github.com/conan-io/conan-center-index/pull/26381
 
 ## After that run next commands:
 ```
 cmake .. -G "Visual Studio 17 2022" -A ARM64 -Thost=ARM64 -B output -DCMAKE_BUILD_TYPE=Debug
 cmake --build output
 ```
+
+Audacity ARM64 will build ok.
